@@ -21,27 +21,24 @@ dropout = 0.0
 with open(r"C:\Users\bahaa\Downloads\First Citizen_eos.txt", 'r', encoding='utf-8') as f:
     text = f.read()
 
-strings=text.split("\n")
+strings = text.split("\n")
 
-
-
-tokenizer = Tokenizer()  # num_words parametresi kaldırıldı
+# Tokenizer işlemi
+tokenizer = Tokenizer()
 tokenizer.fit_on_texts(strings)
 stoi = tokenizer.word_index
-itos=dict(zip(stoi.values(), stoi.keys()))
-
+itos = dict(zip(stoi.values(), stoi.keys()))
 vocab_size = len(stoi)
-# create a mapping from characters to integers
 
-encode_en = lambda s: [stoi[c] for c in s] # encoder: take a string, output a list of integers
-decode_en = lambda l: ''.join([itos[i] for i in l]) # decoder: take a list of integers, output a string
+# Metni sayılara çevirme ve padding
 sequences = tokenizer.texts_to_sequences(strings)
-result = sum(sequences, [])
-# Encode işlemini string üzerinde yapıyoruz:
-data = torch.tensor(result, dtype=torch.long)
+padsequences = pad_sequences(sequences, maxlen=block_size, padding='pre')
+
+# Tensor formatına çevirme (flatten ile tek boyuta indirgeme)
+data = torch.tensor(padsequences, dtype=torch.long).flatten()
 
 # data loading
-"""def get_batch(split):
+def get_batch(split):
     # generate a sequential batch of data of inputs x and targets y
 
     # Veriyi sıralı almak için sabit bir başlangıç noktası belirleyelim
@@ -56,8 +53,8 @@ data = torch.tensor(result, dtype=torch.long)
     
     current_index += batch_size  # Bir sonraki batch için index'i güncelle
     
-    return x, y"""
-def get_batch(split):
+    return x, y
+"""def get_batch(split):
     global current_index
     
     # Veri bitince başa sar
@@ -69,17 +66,13 @@ def get_batch(split):
     x_raw = [data[i:i+block_size].tolist() for i in ix]
     y_raw = [data[i+1:i+block_size+1].tolist() for i in ix]
 
-    # Pad işlemi
-    x_padded = pad_sequences(x_raw, maxlen=block_size, padding='post', value=0)
-    y_padded = pad_sequences(y_raw, maxlen=block_size, padding='post', value=0)
-
     # Tensor’a çevirme
-    x = torch.tensor(x_padded, dtype=torch.long, device=device)
-    y = torch.tensor(y_padded, dtype=torch.long, device=device)
+    x = torch.tensor(x_raw, dtype=torch.long, device=device)
+    y = torch.tensor(y_raw, dtype=torch.long, device=device)
 
     current_index += batch_size  # Batch indeksini güncelle
     
-    return x, y
+    return x, y"""
 
 # Başlangıç indexi
 current_index = 0
